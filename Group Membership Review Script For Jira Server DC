@@ -1,0 +1,37 @@
+//Return a group membership report
+
+import com.atlassian.jira.component.ComponentAccessor
+
+def groupManager = ComponentAccessor.getGroupManager()
+def groups = groupManager.getAllGroups()
+def sb = []
+//Define a string buffer to hold the results
+
+sb.add("<br>Group Name, Active User Count, Inactive User Count, Total User Count")
+//Add a header to the buffer
+groups.each{ group ->
+
+ def activeUsers = 0
+ def inactiveUsers = 0
+ Each time we iterate over a new group, the count of active/inactive users gets set back to zero
+ def groupMembers = groupManager.getUsersInGroup(group)
+ //For each group, fetch the members of the group
+    
+    groupMembers.each{ member ->
+    //Process each member of each group
+        
+    def memberDetails = ComponentAccessor.getUserManager().getUserByName(member.name)
+    //We have to fetch the full user object, using the *name* attribute of the group member
+        
+        if(memberDetails.isActive()){
+            activeUsers += 1 
+        }else{
+            inactiveUsers += 1
+        }
+    }//Increment the count of inactive or active users, depending on the current user's status
+    
+sb.add("<br>"+group.name + ", " + activeUsers + ", " + inactiveUsers+ ", " + (activeUsers + inactiveUsers))
+//Add the results to the buffer
+}
+return sb
+//Return the results
