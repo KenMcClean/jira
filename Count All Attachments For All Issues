@@ -1,0 +1,24 @@
+#Count All Attachments For All Issues on Jira Server/DC
+
+
+import com.atlassian.jira.component.ComponentAccessor
+
+def projectManager = ComponentAccessor.getProjectManager()
+def projects = projectManager.getProjectObjects()
+def issueManager = ComponentAccessor.getIssueManager()
+
+projects.each{ project ->
+
+  def attachmentsTotal = 0
+  def issues = ComponentAccessor.getIssueManager().getIssueIdsForProject(project.id)
+
+  issues.each{ issueID ->
+
+    def issue = ComponentAccessor.getIssueManager().getIssueObject(issueID)
+    def attachmentManager = ComponentAccessor.getAttachmentManager().getAttachments(issue).size()
+    attachmentsTotal += attachmentManager
+
+  }
+  log.warn(project.key + " - " + attachmentsTotal)
+}
+
