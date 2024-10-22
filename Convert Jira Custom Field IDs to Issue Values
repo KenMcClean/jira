@@ -1,0 +1,79 @@
+import groovy.json.JsonSlurper
+ 
+def stillPaginating = true
+//Loop to paginate
+ 
+def startAt = 0
+//Start at a pagination value of 0
+ 
+def maxResults = 50
+//Increment pagination by 50
+ 
+def issueIDs = []
+def fieldNames = ["Actual end", "Actual start", "Change risk", "Epic Status"]
+def customFieldMap = [: ]
+ 
+ 
+//Get all the fields in the system
+def fieldIDs = get("/rest/api/3/field")
+  .header('Content-Type', 'application/json')
+  .header('Accept', 'application/json')
+  .asBinary()
+ 
+def inputStream = fieldIDs.rawBody
+def scanner = new java.util.Scanner(inputStream).useDelimiter("\\A")
+String rawBody = scanner.hasNext() ? scanner.next() : ""
+def json = new JsonSlurper().parseText(rawBody)
+//The response is a rawBody, so we need to convert to JSON
+ 
+json.each{ item ->
+//Iterate through the fields in the system
+ 
+    fieldNames.each{ fieldName ->
+    //Iterate through the user-supplied list of fields
+     
+        if (item.name.toString() == fieldName) {
+            //If the name of any of the fields matches one of the user-supplied field names
+             
+            customFieldMap[fieldName] = item.id.toString()
+          //Add that field name and ID to the map
+        }
+    }
+}
+ 
+ 
+while (stillPaginating) {
+//Loop and paginate while this value is true
+  def response = get("/rest/api/2/search?jql=&startAt=${startAt}&maxResults=${maxResults}")
+    .header('Content-Type', 'application/json')
+    .header('Accept', 'application/json')
+    .asJson()
+ //Fetch the current batch of pagination values
+ 
+  response.body.object.issues.each{ issue ->
+      issue.fields.each{ field ->
+          customFieldMap.each{ key, value ->
+    try{
+       
+      if(field[value] != null){
+      logger.warn("${issue.key} uses custom field ${key}. It has a value of ${field[value]}.")
+      }
+       
+       
+    }catch(Exception e){
+      logger.warn(e.toString())
+  }
+}
+ 
+    }
+  }
+ 
+   
+  if (issueIDs.size() < maxResults) {
+     stillPaginating = false
+     //Kill the pagination loop if we don't get a full batch of responses
+  }
+ 
+  startAt += 50
+  //Move to the next batch of pagination values
+}
