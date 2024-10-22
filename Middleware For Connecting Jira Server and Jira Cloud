@@ -1,0 +1,49 @@
+import requests
+import base64
+
+server_username = "<username>"
+server_password = "<password>"
+server_url = "<url>"
+#Define connection parameters for the server side
+
+cloud_username = "<Cloud login email>"
+cloud_token = "<Cloud token"
+cloud_url = "<Cloud url>"
+#Define connection parameters for the Cloud side
+
+server_credentials_string = f'{server_username}:{server_password}'
+server_input_bytes = server_credentials_string.encode('utf-8')
+server_encoded_bytes = base64.b64encode(server_input_bytes)
+server_encoded_string = server_encoded_bytes.decode('utf-8')
+#Encode the server credentials
+
+cloud_credentials_string = f'{cloud_username}:{cloud_token}'
+cloud_input_bytes = cloud_credentials_string.encode('utf-8')
+cloud_encoded_bytes = base64.b64encode(cloud_input_bytes)
+cloud_encoded_string = cloud_encoded_bytes.decode('utf-8')
+#Encode the Cloud credentials
+
+server_headers = {
+    'Authorization': f'Basic {server_encoded_string}',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+}
+#Define the headers used to connect to the server
+
+cloud_headers = {
+    'Authorization': f'Basic {cloud_encoded_string}',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+}
+#Define the headers used to connect to the Cloud
+
+server_login_request = requests.get(f'{server_url}/rest/api/2/project', headers=server_headers)
+cloud_login_request = requests.get(f'{cloud_url}/rest/api/2/project', headers=cloud_headers)
+#Initiate the connection requests to the server and cloud instances
+
+print(f"Server connection HTTP status: {server_login_request.status_code}")
+print(f"Cloud connection HTTP status: {cloud_login_request.status_code}")
+
+print(f"Server response content: \n{server_login_request.content}")
+print(f"Cloud response content: \n{cloud_login_request.content}")
+#Print some data to confirm successful connection
