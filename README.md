@@ -1,5 +1,12 @@
 # Script Index:
 
+### Calculate Size in KB of a Jira DC Project or Individual Issue
+This Groovy script for Jira DC calculates the storage size of the attachments in a project or individual issue
+
+Keywords: Jira DC, Groovy, ScriptRunner, Storage, Attachments
+
+See https://www.kennethmcclean.com/blog/get-the-size-of-a-project-or-issue-in-jira-using-scriptrunner/ for more information
+
 ### Convert Jira Custom Field IDs to Issue Values
 This Groovy script takes a list of custom field names, and searches each issue in the instance for places where that custom field has been used (i.e., where it has a value other than null).
 
