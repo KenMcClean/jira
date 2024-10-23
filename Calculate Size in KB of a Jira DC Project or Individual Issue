@@ -1,0 +1,28 @@
+//Calculate the storage usage of a Jira DC Project or Individual Issue
+
+import org.ofbiz.core.entity.GenericValue;
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.IssueManager;
+import com.atlassian.jira.project.Project;
+import com.atlassian.jira.project.ProjectManager
+
+def totalSize = 0
+def attachmentManager = ComponentAccessor.getAttachmentManager()
+
+ProjectManager projectManager = ComponentAccessor.getProjectManager()
+
+def projectName = "<projectName>"
+
+Project proj = projectManager.getProjectByCurrentKey(projectName)
+
+IssueManager issueManager = ComponentAccessor.getIssueManager()
+
+for (GenericValue issueValue: issueManager.getProjectIssues(proj.genericValue)) {
+    Issue issue = issueManager.getIssueObject(issueValue.id)
+    attachmentManager.getAttachments(issue).each {
+      attachment ->
+        totalSize += attachment.filesize
+    }
+  }
+  log.warn("Total size of attachments for ${proj.name} is ${totalSize / 1024} kb")
