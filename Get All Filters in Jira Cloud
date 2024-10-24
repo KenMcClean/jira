@@ -1,0 +1,6 @@
+def getFilters = get("/rest/api/3/filter/search")
+        .header('Content-Type', 'application/json')
+        .asObject(Map)
+getFilters.body.values.each{filterValue -> 
+    logger.warn(filterValue.toString())
+}
