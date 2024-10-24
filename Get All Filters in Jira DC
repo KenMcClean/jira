@@ -1,0 +1,36 @@
+import com.atlassian.jira.user.ApplicationUser
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.bc.filter.SearchRequestService
+import com.atlassian.jira.issue.search.SearchRequest
+import com.atlassian.jira.bc.user.search.UserSearchParams
+import com.atlassian.jira.bc.user.search.UserSearchService
+   
+   
+SearchRequestService searchRequestService = ComponentAccessor.getComponent(SearchRequestService.class)
+UserSearchService userSearchService = ComponentAccessor.getComponent(UserSearchService)
+def sb = new StringBuffer()
+   
+UserSearchParams userSearchParams = new UserSearchParams.Builder()
+    .allowEmptyQuery(true)
+    .includeInactive(false)
+    .ignorePermissionCheck(true)
+    .build()
+//Define the parameters of the query
+  
+//Iterate over each user's filters
+userSearchService.findUsers("", userSearchParams).each{ApplicationUser filter_owner ->
+    try {
+        searchRequestService.getOwnedFilters(filter_owner).each{SearchRequest filter->
+            String jql = filter.getQuery().toString()
+            //for each fiilter, get JQL and check if it contains our string
+             
+                sb.append("Found: ${filter.name}, ${jql}\n" + "<br>")
+             
+        }
+    } catch (Exception e) {
+            //if filter is private
+           sb.append("Unable to get filters for ${filter_owner.displayName} due to ${e}")
+    }
+}
+ 
+return sb
